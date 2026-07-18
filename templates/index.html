@@ -1,33 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>My Watchlist</title>
-    <!-- 网站标签页小图标 -->
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <!-- 引入样式文件 -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
+{% extends 'base.html' %}
 
-<body>
-
-<h1>
-    <img alt="Avatar" class="avatar" src="{{ url_for('static', filename='images/avatar.png') }}">
-    {{ user.name }}的电影清单
-</h1>
-<p>{{ movies|length }} 部电影</p>
-
-{% if movies %}
+{% block content %}
+<p>{{ movies|length }} Titles</p>
 <ul class="movie-list">
     {% for movie in movies %}
-        <li>{{ movie }}</li>
+    <li>{{ movie.title }} - {{ movie.year }}
+        <span class="float-right">
+            <a class="imdb" href="https://www.imdb.com/find?q={{ movie.title }}" target="_blank" title="Find this movie on IMDb">IMDb</a>
+        </span>
+    </li>
     {% endfor %}
 </ul>
-{% else %}
-<p>暂无电影</p>
-{% endif %}
-<img alt="Walking Totoro" class="totoro" src="{{ url_for('static', filename='images/totoro.gif') }}">
-<footer>
-    <small>© 2025 HelloFlask</small>
-</footer>
-</body>
-</html>
+<img alt="Walking Totoro" class="totoro" src="{{ url_for('static', filename='images/totoro.gif') }}" title="to~to~ro~">
+{% endblock %}

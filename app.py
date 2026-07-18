@@ -37,11 +37,18 @@ class Movie(db.Model):
 
 @app.route('/')
 def index():
-    # 从数据库读取第一条用户记录
-    user = db.session.execute(select(User)).scalar()
-    # 从数据库读取所有电影记录
     movies = db.session.execute(select(Movie)).scalars().all()
-    return render_template('index.html', user=user, movies=movies)
+    return render_template('index.html', movies=movies)
+
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('404.html'), 404
+
+@app.context_processor
+def inject_user():
+    user = db.session.execute(select(User)).scalar()
+    return dict(user=user)
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)  # 5001 避开 Docker 使用的 5000 端口
