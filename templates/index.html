@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Watchlist</title>
+</head>
+
+<body>
+
+<h1>{{ name }}的电影清单</h1>
+<p>{{ movies|length }} 部电影</p>
+
+{% if movies %}
+<ul>
+    {% for movie in movies %}
+        <li>{{ movie }}</li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>暂无电影</p>
+{% endif %}
+
+</body>
+</html>
