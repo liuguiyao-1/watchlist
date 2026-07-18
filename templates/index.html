@@ -2,15 +2,22 @@
 <html>
 <head>
     <title>My Watchlist</title>
+    <!-- 网站标签页小图标 -->
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <!-- 引入样式文件 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
 
-<h1>{{ name }}的电影清单</h1>
+<h1>
+    <img alt="Avatar" class="avatar" src="{{ url_for('static', filename='images/avatar.png') }}">
+    {{ name }}的电影清单
+</h1>
 <p>{{ movies|length }} 部电影</p>
 
 {% if movies %}
-<ul>
+<ul class="movie-list">
     {% for movie in movies %}
         <li>{{ movie }}</li>
     {% endfor %}
@@ -18,6 +25,9 @@
 {% else %}
 <p>暂无电影</p>
 {% endif %}
-
+<img alt="Walking Totoro" class="totoro" src="{{ url_for('static', filename='images/totoro.gif') }}">
+<footer>
+    <small>© 2025 HelloFlask</small>
+</footer>
 </body>
 </html>
