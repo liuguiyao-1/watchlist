@@ -6,11 +6,13 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import String, select
 from sqlalchemy.orm import Mapped, mapped_column
+from flask import request, url_for, redirect, flash
 
 # 兼容 Windows / Mac/Linux 的 SQLite 路径前缀
 SQLITE_PREFIX = 'sqlite:///' if sys.platform.startswith('win') else 'sqlite:////'
 
 app = Flask(__name__)  # 创建 Flask 应用
+app.config['SECRET_KEY'] = 'dev'
 
 # 配置数据库地址：在项目根目录生成 data.db 文件
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLITE_PREFIX + str(Path(app.root_path) / 'data.db')
@@ -35,11 +37,56 @@ class Movie(db.Model):
     title: Mapped[str] = mapped_column(String(60))     # 电影标题
     year: Mapped[str] = mapped_column(String(4))       # 上映年份
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
+    if request.method == 'POST':  # 判断是否是表单提交
+        # 获取表单里输入的内容
+        title = request.form.get('title').strip()
+        year = request.form.get('year').strip()
+
+        # 后端验证输入是否合法
+        if not title or not year or len(year) != 4 or len(title) > 60:
+            flash('Invalid input.')  # 显示错误提示
+            return redirect(url_for('index'))  # 重定向回首页
+
+        # 保存到数据库
+        movie = Movie(title=title, year=year)
+        db.session.add(movie)
+        db.session.commit()
+        flash('Item created.')  # 显示成功提示
+        return redirect(url_for('index'))  # 重定向回首页
+
+    # GET 请求：正常渲染电影列表
     movies = db.session.execute(select(Movie)).scalars().all()
     return render_template('index.html', movies=movies)
 
+@app.route('/movie/edit/<int:movie_id>', methods=['GET', 'POST'])
+def edit(movie_id):
+    movie = db.get_or_404(Movie, movie_id)
+
+    if request.method == 'POST':
+        title = request.form.get('title').strip()
+        year = request.form.get('year').strip()
+
+        if not title or not year or len(year) != 4 or len(title) > 60:
+            flash('Invalid input.')
+            return redirect(url_for('edit', movie_id=movie_id))
+
+        movie.title = title
+        movie.year = year
+        db.session.commit()
+        flash('Item updated.')
+        return redirect(url_for('index'))
+
+    return render_template('edit.html', movie=movie)
+
+@app.route('/movie/delete/<int:movie_id>', methods=['POST'])
+def delete(movie_id):
+    movie = db.get_or_404(Movie, movie_id)
+    db.session.delete(movie)
+    db.session.commit()
+    flash('Item deleted.')
+    return redirect(url_for('index'))
 
 @app.errorhandler(404)
 def page_not_found(error):
